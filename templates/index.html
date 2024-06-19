@@ -76,12 +76,11 @@
         <button type="button" onclick="viewUploadedCSV()" id="view-csv-btn" disabled>View Uploaded CSV</button>
 
         <div class="csv-container hidden" id="csv-container">
-            <!-- Placeholder for displaying CSV content -->
-            <!-- Replace this with actual content display logic -->
-            <p>CSV File Content Goes Here</p>
+            <button type="button" onclick="backToChat()">Back to Chat</button>
+            <img id="csv-image" src="" alt="Uploaded CSV Image">
         </div>
 
-        <div class="chat-box hidden" id="chat-box"></div>
+        <div class="chat-box" id="chat-box"></div>
         <div class="input-box">
             <input type="text" id="user-input" placeholder="Type your question here..." onkeydown="handleKeyPress(event)">
             <button onclick="sendMessage()">Send</button>
@@ -122,11 +121,57 @@
             if (filePath) {
                 csvContainer.classList.remove('hidden');
                 chatBox.classList.add('hidden');
-                // For demonstration purposes, showing a placeholder text
-                csvContainer.innerHTML = '<p>Here is your CSV content or viewer</p>';
+
+                // Fetch the CSV content from the server
+                console.log(filePath)
+                fetch(filePath)
+                    .then(response => response.text())
+                    .then(csvData => {
+                        // Split CSV data into rows
+                        const rows = csvData.split('\n');
+
+                        // Start building the HTML table
+                        let tableHtml = '<table>';
+
+                        // Iterate over rows and create table rows and cells
+                        rows.forEach((row, index) => {
+                            tableHtml += '<tr>';
+
+                            // Split row into cells
+                            const cells = row.split(',');
+
+                            cells.forEach(cell => {
+                                if (index === 0) {
+                                    // Use the first row for headers (th)
+                                    tableHtml += `<th>${cell}</th>`;
+                                } else {
+                                    // Regular data rows (td)
+                                    tableHtml += `<td>${cell}</td>`;
+                                }
+                            });
+
+                            tableHtml += '</tr>';
+                        });
+
+                        tableHtml += '</table>'; // Close table
+
+                        // Set the innerHTML of csv-container to the generated table HTML
+                        csvContainer.innerHTML = tableHtml;
+                    })
+                    .catch(error => {
+                        console.error('Error fetching CSV:', error);
+                        alert('Error fetching CSV. Please try again.');
+                    });
+
             } else {
                 alert('Please upload a CSV file first.');
             }
+        }
+
+
+        function backToChat() {
+            csvContainer.classList.add('hidden');
+            chatBox.classList.remove('hidden');
         }
 
         function sendMessage() {
