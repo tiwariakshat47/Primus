@@ -40,6 +40,8 @@
             cursor: pointer;
             border-radius: 5px;
         }
+
+        
         .message {
             margin-bottom: 10px;
         }
@@ -71,7 +73,15 @@
             <button type="button" onclick="uploadFile()">Upload CSV</button>
             <label><input type="checkbox" id="upload-status" disabled> CSV Uploaded</label>
         </form>
-        <div class="chat-box" id="chat-box"></div>
+        <button type="button" onclick="viewUploadedCSV()" id="view-csv-btn" disabled>View Uploaded CSV</button>
+
+        <div class="csv-container hidden" id="csv-container">
+            <!-- Placeholder for displaying CSV content -->
+            <!-- Replace this with actual content display logic -->
+            <p>CSV File Content Goes Here</p>
+        </div>
+
+        <div class="chat-box hidden" id="chat-box"></div>
         <div class="input-box">
             <input type="text" id="user-input" placeholder="Type your question here..." onkeydown="handleKeyPress(event)">
             <button onclick="sendMessage()">Send</button>
@@ -82,6 +92,9 @@
     <script>
         let filePath = '';
         const uploadStatusCheckbox = document.getElementById('upload-status');
+        const viewCsvBtn = document.getElementById('view-csv-btn');
+        const csvContainer = document.getElementById('csv-container');
+        const chatBox = document.getElementById('chat-box');
 
         function uploadFile() {
             const fileInput = document.getElementById('file-input');
@@ -97,6 +110,7 @@
                 if (data.file_path) {
                     filePath = data.file_path;
                     uploadStatusCheckbox.checked = true;
+                    viewCsvBtn.removeAttribute('disabled'); // Enable View Uploaded CSV button
                     alert('File uploaded successfully');
                 } else {
                     alert(data.message);
@@ -104,17 +118,27 @@
             });
         }
 
+        function viewUploadedCSV() {
+            if (filePath) {
+                csvContainer.classList.remove('hidden');
+                chatBox.classList.add('hidden');
+                // For demonstration purposes, showing a placeholder text
+                csvContainer.innerHTML = '<p>Here is your CSV content or viewer</p>';
+            } else {
+                alert('Please upload a CSV file first.');
+            }
+        }
+
         function sendMessage() {
             const userInput = document.getElementById('user-input').value;
             if (!userInput) return;
 
-            if (!filePath) {
-                alert('Please upload a CSV file first.');
-                return;
+            if (filePath && !csvContainer.classList.contains('hidden')) {
+                csvContainer.classList.add('hidden');
+                chatBox.classList.remove('hidden');
             }
 
             // Append user's message to chat
-            const chatBox = document.getElementById('chat-box');
             const userMessage = document.createElement('div');
             userMessage.classList.add('message', 'user-message');
             userMessage.textContent = userInput;
