@@ -41,7 +41,7 @@ def query():
     
     os.environ['OPENAI_API_KEY'] = OPENAI_API_KEY
     df = pd.read_csv(file_path)
-    gpt_4_agent = create_csv_agent(ChatOpenAI(), file_path, verbose=True, allow_dangerous_code=True)
+    gpt_4_agent = create_csv_agent(ChatOpenAI(model="gpt-4"), file_path, verbose=True, allow_dangerous_code=True)
     response = gpt_4_agent.run(user_input)
     
     if "N/A" in response:
