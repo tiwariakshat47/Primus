@@ -40,8 +40,7 @@
             cursor: pointer;
             border-radius: 5px;
         }
-
-        
+    
         .message {
             margin-bottom: 10px;
         }
@@ -55,7 +54,8 @@
             width: 24px;
             height: 24px;
             animation: spin 1s linear infinite;
-            display: inline-block;
+            display: none; /* Initially hidden */
+            margin: auto; /* Center the spinner */
         }
         @keyframes spin {
             to { transform: rotate(360deg); }
@@ -63,7 +63,37 @@
         .hidden {
             display: none;
         }
+    
+        /* Styling for CSV container and table */
+        .csv-container {
+            margin-top: 10px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            overflow-x: auto; /* Allow horizontal scrolling */
+            max-width: 100%; /* Ensure it takes full width of its parent */
+        }
+        .csv-container table {
+            width: auto; /* Auto width to fit content */
+            border-collapse: collapse;
+        }
+        .csv-container th, .csv-container td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: left;
+        }
+        .csv-container th {
+            background-color: #f2f2f2;
+        }
+        .csv-container img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: auto;
+            max-height: 300px; /* Limit image height */
+        }
     </style>
+    
 </head>
 <body>
     <div class="chat-container">
@@ -78,6 +108,8 @@
         <div class="csv-container hidden" id="csv-container">
             <button type="button" onclick="backToChat()">Back to Chat</button>
             <img id="csv-image" src="" alt="Uploaded CSV Image">
+            <div class="loading-spinner" id="csv-loading-spinner"></div>
+            <table id="csv-table" class="hidden"></table>
         </div>
 
         <div class="chat-box" id="chat-box"></div>
@@ -93,6 +125,8 @@
         const uploadStatusCheckbox = document.getElementById('upload-status');
         const viewCsvBtn = document.getElementById('view-csv-btn');
         const csvContainer = document.getElementById('csv-container');
+        const csvLoadingSpinner = document.getElementById('csv-loading-spinner');
+        const csvTable = document.getElementById('csv-table');
         const chatBox = document.getElementById('chat-box');
 
         function uploadFile() {
@@ -117,20 +151,18 @@
             });
         }
 
-
-        
         function viewUploadedCSV() {
             if (filePath) {
                 const fileInput = document.getElementById('file-input');
                 const file = fileInput.files[0];
 
-                if (file.size > 5242880) { // Limit set to 5MB (5242880 bytes)
+                if (file.size > 5000000) { // Limit set to 5MB (5000000 bytes)
                     alert('File size exceeds the limit (5MB). Please upload a smaller file.');
                     return;
                 }
 
-                csvContainer.classList.remove('hidden');
-                chatBox.classList.add('hidden');
+                // Show loading spinner while loading CSV
+                csvLoadingSpinner.classList.remove('hidden');
 
                 const reader = new FileReader();
 
@@ -165,22 +197,39 @@
 
                     tableHtml += '</table>'; // Close table
 
-                    // Set the innerHTML of csv-container to the generated table HTML
-                    csvContainer.innerHTML = tableHtml;
+                    // Hide loading spinner after CSV is loaded
+                    csvLoadingSpinner.classList.add('hidden');
+
+                    // Display the CSV table
+                    csvTable.innerHTML = tableHtml;
+                    csvTable.classList.remove('hidden');
+
+                    // Hide the CSV image if present
+                    document.getElementById('csv-image').classList.add('hidden');
                 };
 
                 reader.readAsText(file);
+                
+                // Hide chat box when viewing CSV
+                chatBox.classList.add('hidden');
+                // Show CSV container
+                csvContainer.classList.remove('hidden');
             } else {
                 alert('Please upload a CSV file first.');
             }
         }
 
-
-
-
         function backToChat() {
-            csvContainer.classList.add('hidden');
+            // Show chat box
             chatBox.classList.remove('hidden');
+            // Hide CSV container
+            csvContainer.classList.add('hidden');
+            // Hide CSV loading spinner
+            csvLoadingSpinner.classList.add('hidden');
+            // Hide CSV table if visible
+            csvTable.classList.add('hidden');
+            // Show the CSV image again if it was hidden
+            document.getElementById('csv-image').classList.remove('hidden');
         }
 
         function sendMessage() {
