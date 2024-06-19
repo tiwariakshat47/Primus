@@ -117,56 +117,65 @@
             });
         }
 
+
+        
         function viewUploadedCSV() {
             if (filePath) {
+                const fileInput = document.getElementById('file-input');
+                const file = fileInput.files[0];
+
+                if (file.size > 5242880) { // Limit set to 5MB (5242880 bytes)
+                    alert('File size exceeds the limit (5MB). Please upload a smaller file.');
+                    return;
+                }
+
                 csvContainer.classList.remove('hidden');
                 chatBox.classList.add('hidden');
 
-                // Fetch the CSV content from the server
-                console.log(filePath)
-                fetch(filePath)
-                    .then(response => response.text())
-                    .then(csvData => {
-                        // Split CSV data into rows
-                        const rows = csvData.split('\n');
+                const reader = new FileReader();
 
-                        // Start building the HTML table
-                        let tableHtml = '<table>';
+                reader.onload = function(event) {
+                    const csvData = event.target.result;
 
-                        // Iterate over rows and create table rows and cells
-                        rows.forEach((row, index) => {
-                            tableHtml += '<tr>';
+                    // Split CSV data into rows
+                    const rows = csvData.trim().split('\n');
 
-                            // Split row into cells
-                            const cells = row.split(',');
+                    // Start building the HTML table
+                    let tableHtml = '<table>';
 
-                            cells.forEach(cell => {
-                                if (index === 0) {
-                                    // Use the first row for headers (th)
-                                    tableHtml += `<th>${cell}</th>`;
-                                } else {
-                                    // Regular data rows (td)
-                                    tableHtml += `<td>${cell}</td>`;
-                                }
-                            });
+                    // Iterate over rows and create table rows and cells
+                    rows.forEach((row, index) => {
+                        tableHtml += '<tr>';
 
-                            tableHtml += '</tr>';
+                        // Split row into cells
+                        const cells = row.split(',');
+
+                        cells.forEach(cell => {
+                            if (index === 0) {
+                                // Use the first row for headers (th)
+                                tableHtml += `<th>${cell}</th>`;
+                            } else {
+                                // Regular data rows (td)
+                                tableHtml += `<td>${cell}</td>`;
+                            }
                         });
 
-                        tableHtml += '</table>'; // Close table
-
-                        // Set the innerHTML of csv-container to the generated table HTML
-                        csvContainer.innerHTML = tableHtml;
-                    })
-                    .catch(error => {
-                        console.error('Error fetching CSV:', error);
-                        alert('Error fetching CSV. Please try again.');
+                        tableHtml += '</tr>';
                     });
 
+                    tableHtml += '</table>'; // Close table
+
+                    // Set the innerHTML of csv-container to the generated table HTML
+                    csvContainer.innerHTML = tableHtml;
+                };
+
+                reader.readAsText(file);
             } else {
                 alert('Please upload a CSV file first.');
             }
         }
+
+
 
 
         function backToChat() {
